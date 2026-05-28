@@ -162,17 +162,17 @@
     <script type="text/babel" data-type="module">
         import { initializeApp } from "https://gs.jurieo.com/gemini/gstatic/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://gs.jurieo.com/gemini/gstatic/firebasejs/11.1.0/firebase-auth.js";
-        import { initializeFirestore, persistentLocalCache, getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, limit } from "https://gs.jurieo.com/gemini/gstatic/firebasejs/11.1.0/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, limit, writeBatch } from "https://gs.jurieo.com/gemini/gstatic/firebasejs/11.1.0/firebase-firestore.js";
 
         const { useState, useEffect, useRef, useMemo, memo, useCallback, useDeferredValue } = React;
 
         const firebaseConfig = {
-          apiKey: "AIzaSyA-bOghSL8apcO6NEda6nc_-_UO6-h9SDs",
-          authDomain: "video-b02b3.firebaseapp.com",
-          projectId: "video-b02b3",
-          storageBucket: "video-b02b3.firebasestorage.app",
-          messagingSenderId: "25339039789",
-          appId: "1:25339039789:web:6bc5a86b6e2cf39a1f68a4"
+          apiKey: "AIzaSyBS1uezUnNrohIDovyvNixmbcJ_dtNgVUs",
+          authDomain: "watch-7497b.firebaseapp.com",
+          projectId: "watch-7497b",
+          storageBucket: "watch-7497b.firebasestorage.app",
+          messagingSenderId: "317588373442",
+          appId: "1:317588373442:web:5b72b60592e0e3efbce05b"
         };
         
         const app = initializeApp(firebaseConfig);
@@ -185,13 +185,13 @@
             db = getFirestore(app);
         }
         
-        const appId = 'video-library-v1';
+        const appId = 'watch-library-v1';
         const isMobileDevice = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         const NUM_REGEX = /(\d+(\.\d+)?)/;
         const IGNORE_CHAR_REGEX = /^[\s\-—:：,，.。!！?？()（）\[\]【】《》<>\/\\~～]+$/;
 
         const emptyProgress = { v1: '', u1: '集', v2: '', u2: '分鐘' };
-        const displayMembers = ["糖糖", "雲雲"];
+        const displayMembers = ["糖糖"];
         const ensureP = (v) => v?.v1 !== undefined ? { ...emptyProgress, ...v } : { ...emptyProgress, v1: v || '' };
         const getPublicCol = (col) => collection(db, 'artifacts', appId, 'public', 'data', col);
 
@@ -371,12 +371,11 @@
         const TitleIcon = () => (
             <svg className="w-14 h-14" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7.741 28.343L28.255 28.343C29.448 28.343 30.415 27.376 30.415 26.183L30.415 9.51C30.415 8.318 29.448 7.35 28.255 7.35L7.741 7.35C6.548 7.35 5.581 8.318 5.581 9.51L5.581 26.183C5.581 27.376 6.548 28.343 7.741 28.343z" fill="#9796ED"></path>
-                {/* 下面這 6 行的座標，我已經把引起崩潰的隱形 L 剔除了！ */}
                 <path d="M8.238 10.727C8.238 11.323 8.721 11.807 9.318 11.807L11.308 11.807C11.905 11.807 12.388 11.323 12.388 10.727C12.388 10.13 11.905 9.647 11.308 9.647L9.318 9.647C8.721 9.647 8.238 10.13 8.238 10.727z" fill="#6D69E4"></path>
                 <path d="M16.035 10.727C16.035 11.323 16.518 11.807 17.115 11.807L19.105 11.807C19.701 11.807 20.185 11.323 20.185 10.727C20.185 10.13 19.701 9.647 19.105 9.647L17.115 9.647C16.518 9.647 16.035 10.13 16.035 10.727z" fill="#6D69E4"></path>
-                <path d="M23.831 10.727C23.831 11.323 24.315 11.807 24.911 11.807L26.901 11.807C27.498 11.807 27.981 11.323 27.981 10.727C27.981 10.13 27.498 9.647 24.911 9.647C24.315 9.647 23.831 10.13 23.831 10.727z" fill="#6D69E4"></path>
+                <path d="M23.831 10.727C23.831 11.323 24.315 11.807 24.911 11.807L26.901 11.807C27.498 11.807 27.981 11.323 27.981 10.727C27.981 10.13 27.498 9.647 26.901 9.647L24.911 9.647C24.315 9.647 23.831 10.13 23.831 10.727z" fill="#6D69E4"></path>
                 <path d="M8.238 25.721C8.238 26.318 8.721 26.801 9.318 26.801L11.308 26.801C11.905 26.801 12.388 26.318 12.388 25.721C12.388 25.125 11.905 24.641 11.308 24.641L9.318 24.641C8.721 24.641 8.238 25.125 8.238 25.721z" fill="#6D69E4"></path>
-                <path d="M16.035 25.721C16.035 26.318 16.518 26.801 17.115 26.801L19.105 26.801C19.701 26.801 20.185 25.721C20.185 25.125 19.701 24.641 19.105 24.641L17.115 24.641C16.518 24.641 16.035 25.125 16.035 25.721z" fill="#6D69E4"></path>
+                <path d="M16.035 25.721C16.035 26.318 16.518 26.801 17.115 26.801L19.105 26.801C19.701 26.801 20.185 26.318 20.185 25.721C20.185 25.125 19.701 24.641 19.105 24.641L17.115 24.641C16.518 24.641 16.035 25.125 16.035 25.721z" fill="#6D69E4"></path>
                 <path d="M23.831 25.721C23.831 26.318 24.315 26.801 24.911 26.801L26.901 26.801C27.498 26.801 27.981 26.318 27.981 25.721C27.981 25.125 27.498 24.641 26.901 24.641L24.911 24.641C24.315 24.641 23.831 25.125 23.831 25.721z" fill="#6D69E4"></path>
                 <path d="M5.581 22.439L30.415 22.439L30.415 13.254L5.581 13.254L5.581 22.439z" fill="#6D69E4"></path>
                 <path d="M14.817 19.422C14.873 19.272 14.901 19.197 14.928 19.162C15.043 19.013 15.267 19.013 15.382 19.162C15.409 19.197 15.437 19.272 15.493 19.422C15.802 20.258 16.462 20.918 17.298 21.227C17.448 21.283 17.523 21.311 17.558 21.338C17.707 21.453 17.707 21.677 17.558 21.792C17.523 21.819 17.448 21.847 17.298 21.903C16.462 22.212 15.802 22.871 15.493 23.708C15.437 23.858 15.409 23.933 15.382 23.968C15.267 24.116 15.043 24.116 14.928 23.968C14.9 23.933 14.873 23.858 14.817 23.708C14.508 22.871 13.849 22.212 13.012 21.903C12.862 21.847 12.787 21.819 12.752 21.792C12.604 21.677 12.604 21.453 12.752 21.338C12.787 21.311 12.862 21.283 13.012 21.227C13.849 20.918 14.508 20.258 14.817 19.422z" fill="#FDDE80"></path>
@@ -777,6 +776,51 @@ const formatBracketTitle = (text) => {
             );
         });
 
+        // ==========================================
+        // 🌟 新增：擁有「1秒延遲展開」智慧的操作日誌專屬元件
+        // ==========================================
+        const ActivityLogItem = memo(({ l, nameColorMap }) => {
+            const [isExpanded, setIsExpanded] = useState(false);
+            const timerRef = useRef(null);
+
+            const handleMouseEnter = () => {
+                // 調整為 500 毫秒 (0.5 秒)
+                timerRef.current = setTimeout(() => {
+                    setIsExpanded(true);
+                }, 500); 
+            };
+
+            const handleMouseLeave = () => {
+                // 如果滑鼠快速移開，馬上清除計時器
+                if (timerRef.current) clearTimeout(timerRef.current);
+                setIsExpanded(false);
+            };
+
+            return (
+                <div 
+                    className="border-b border-white/5 py-1 flex items-center w-full transition-all"
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <span className="text-white/30 text-[10px] mr-1 flex-shrink-0">{formatDate(l.timestamp).split(' ')[1]}</span> 
+                    <span className="font-bold mr-0.5 flex-shrink-0 text-[11.5px]" style={{ color: nameColorMap[l.userName] || '#fff' }}>{l.userName}</span> 
+                    {l.action === "系統" ? (
+                        <span className={`font-black text-[11.5px] text-green-400 shrink min-w-0 transition-all pr-2 ${isExpanded ? 'whitespace-normal overflow-visible break-all' : 'truncate'}`} title={l.gameName}>{formatBracketTitle(l.gameName)}</span> 
+                    ) : (
+                        <>
+                            <span className={`mr-0.5 flex-shrink-0 text-[10.5px] ${l.action === '移除' ? 'text-red-400 font-bold' : 'opacity-80'}`}>{l.action}</span>
+                            <span className={`font-black text-[11.5px] shrink min-w-0 transition-all ${isExpanded ? 'whitespace-normal overflow-visible break-all' : 'truncate'}`} title={l.gameName}>
+                                {l.gameOrder && <span className="text-[#ffbae9] mr-0.5 relative -top-[1px]">[{l.gameOrder}]</span>}
+                                {formatBracketTitle(l.gameName)}
+                            </span>
+                            {l.extraDetail && <span className="text-cyan-300 font-bold flex-shrink-0 text-[10.5px] pr-2">{l.extraDetail}</span>}
+                        </>
+                    )}
+                </div>
+            );
+        });
+        // ==========================================
+
         function App() {
             const CURRENT_APP_VERSION = 1181; 
             const [user, setUser] = useState(null), [games, setGames] = useState([]);
@@ -836,7 +880,16 @@ const formatBracketTitle = (text) => {
             const [renameCategoryNewValue, setRenameCategoryNewValue] = useState("");
             const [showEditUserModal, setShowEditUserModal] = useState(false);
             const [tempNewUserName, setTempNewUserName] = useState("");
-const [reminderUserFilter, setReminderUserFilter] = useState("全部"); // 新增：追劇面板成員切換狀態 ('全部' / '糖糖' / '雲雲')
+const [reminderUserFilter, setReminderUserFilter] = useState("全部"); // 新增：追劇面板成員切換狀態 ('全部' / '糖糖')
+            
+            // 👇🌟 新增：系統內部時鐘引擎 🌟👇
+            const [systemTick, setSystemTick] = useState(0);
+            useEffect(() => {
+                // 每 60 秒 (60000 毫秒) 觸發一次心跳，推動全系統時間前進
+                const clock = setInterval(() => setSystemTick(t => t + 1), 60000);
+                return () => clearInterval(clock);
+            }, []);
+            // 👆🌟 新增結束 🌟👆
             
             const CHUNK_SIZE = 36;
             const [displayLimit, setDisplayLimit] = useState(CHUNK_SIZE);
@@ -920,7 +973,7 @@ const [reminderUserFilter, setReminderUserFilter] = useState("全部"); // 新�
             
             const nameColorMap = useMemo(() => { 
                 const m = {}; userProfiles.forEach(p => { if(p.name) m[p.name] = p.color; }); 
-                m[userName] = userColor; m["糖糖"] = "#ffbae9"; m["神雲"] = "#47daff"; m["雲雲"] = "#47daff"; 
+                m[userName] = userColor; m["糖糖"] = "#ffbae9"; 
                 return m; 
             }, [userProfiles, userName, userColor]);
             
@@ -969,7 +1022,7 @@ const [reminderUserFilter, setReminderUserFilter] = useState("全部"); // 新�
                     } 
                     if(result.length >= 3) break; 
                 }
-                return result.length > 0 ? result : ["已完結", "連載中", "待播出"]; 
+                return result.length > 0 ? result : ["已完結", "連載中", "待播出", "未知"]; 
             }, [games]);
             
             const recentCategories = useMemo(() => {
@@ -1179,9 +1232,26 @@ const [reminderUserFilter, setReminderUserFilter] = useState("全部"); // 新�
                             if(item) { chain.push(item); check++; } else break; 
                         }
                         chain.reverse(); 
-                        await Promise.all(chain.map(item => setDoc(doc(getPublicCol('games'), item.id), { order: (item.parsedOrder + 1).toString() }, { merge: true })));
+
+                        // 🌟 極速引擎：使用分塊批量寫入 (Batched Writes)，消滅 99% 的延遲與卡頓
+                        const batches = [];
+                        let batch = writeBatch(db);
+                        let opCount = 0;
                         
-                        // ===== 新增：記錄自動順延的系統操作 =====
+                        chain.forEach((item, index) => {
+                            batch.set(doc(getPublicCol('games'), item.id), { order: (item.parsedOrder + 1).toString() }, { merge: true });
+                            opCount++;
+                            
+                            // Firebase 規定每個 Batch 軟上限為 500，我們設 400 為安全切割值
+                            if (opCount === 400 || index === chain.length - 1) {
+                                batches.push(batch.commit());
+                                batch = writeBatch(db);
+                                opCount = 0;
+                            }
+                        });
+                        
+                        await Promise.all(batches);
+                        
                         logActivity("系統", `因新編號 [${to}] 插隊，自動順延了 ${chain.length} 筆檔案`, "");
                     }
                     if(formData.source.trim()) { 
@@ -1260,33 +1330,119 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                 }
             };
 
+            const countAiringEvents = useCallback((startDate, endDate, updateDays, updateTimeStr) => {
+
+                if (!startDate || !endDate || startDate >= endDate || !updateDays || !updateTimeStr) return 0;
+
+                const daysMap = { '日': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6 };
+
+                const targetDays = (Array.isArray(updateDays) ? updateDays : [updateDays]).map(d => daysMap[d]).filter(d => d !== undefined);
+
+                if (targetDays.length === 0) return 0;
+
+                
+
+                const [targetH, targetM] = updateTimeStr.split(':').map(Number);
+
+                let count = 0;
+
+                let current = new Date(startDate.getTime());
+
+                current.setHours(targetH, targetM, 0, 0);
+
+                
+
+                if (current <= startDate) current.setDate(current.getDate() + 1);
+
+
+
+                while (current <= endDate) {
+
+                    if (targetDays.includes(current.getDay())) count++;
+
+                    current.setDate(current.getDate() + 1);
+
+                }
+
+                return count;
+
+            }, []);
+
+
+
+            // 1.5 🌟 全域智慧資料庫攔截器：讓「更新至」在所有卡片、統計中都會跟著時間自動增加！
+
+            const smartGames = useMemo(() => {
+                const now = new Date();
+                return games.map(g => {
+                    if (g.airingStatus !== "連載中" || !g.updateDay || (Array.isArray(g.updateDay) ? g.updateDay.length === 0 : !g.updateDay) || !g.updateTime) {
+                        return { ...g, _virtualUpdate: parseFloat(g.updatedEpisodes?.v1) || 0, _missedEpisodes: 0 };
+                    }
+                    
+                    // 🌟 修復跳動 Bug：攔截 Firebase 的「等待中 (null)」狀態，防止時空倒流回 1970 年
+                    let docUpdatedAt;
+                    if (g.updatedAt && typeof g.updatedAt.toDate === 'function') {
+                        docUpdatedAt = g.updatedAt.toDate();
+                    } else if (g.updatedAt && g.updatedAt.seconds) {
+                        docUpdatedAt = new Date(g.updatedAt.seconds * 1000);
+                    } else if (g.updatedAt === null) {
+                        // 當前正在等待 Firebase 伺服器回傳時間，代表「剛剛才修改」，直接當作現在時間
+                        docUpdatedAt = now;
+                    } else if (g.createdAt && g.createdAt.seconds) {
+                        docUpdatedAt = new Date(g.createdAt.seconds * 1000);
+                    } else if (g.timestamp && g.timestamp.seconds) {
+                        docUpdatedAt = new Date(g.timestamp.seconds * 1000);
+                    } else {
+                        docUpdatedAt = now; // 終極防線：沒有時間就當作現在，不准回 1970 年
+                    }
+
+                    const missedEpisodes = countAiringEvents(docUpdatedAt, now, g.updateDay, g.updateTime);
+                    
+                    if (missedEpisodes > 0) {
+                        const curUpdateDB = parseFloat(g.updatedEpisodes?.v1) || 0;
+                        const total = parseFloat(g.totalEpisodes?.v1) || Infinity;
+                        const virtualUpdate = Math.min(curUpdateDB + missedEpisodes, total); // 防超量上限保護
+                        
+                        return {
+                            ...g,
+                            updatedEpisodes: { ...ensureP(g.updatedEpisodes), v1: virtualUpdate.toString() },
+                            _rawUpdatedEpisodes: g.updatedEpisodes,
+                            _virtualUpdate: virtualUpdate,
+                            _missedEpisodes: missedEpisodes
+                        };
+                    }
+                    return { ...g, _virtualUpdate: parseFloat(g.updatedEpisodes?.v1) || 0, _missedEpisodes: 0 };
+                });
+            }, [games, countAiringEvents, systemTick]);
+            
             const handleUpdateWatchOrder = async (id, val) => { 
                 if(!user) return; 
                 try { 
                     const targetGame = gamesRef.current.find(g => g.id === id);
                     await setDoc(doc(getPublicCol('games'), id), { watchOrder: val }, { merge: true }); 
                     if (targetGame) {
-                        // 新增：寫入操作日誌
                         logActivity("修改", targetGame.name, targetGame.order, `觀看順序改為 [${val}]`);
                     }
                 } catch(e) {} 
             };
             
+            // 🔴 變更點：改用 smartGames
             const watchListGames = useMemo(() => { 
-                return [...games].filter(g => g.watchOrder !== undefined && g.watchOrder !== null && g.watchOrder !== "").sort((a, b) => parseFloat(a.watchOrder) - parseFloat(b.watchOrder)); 
-            }, [games]);
+                return [...smartGames].filter(g => g.watchOrder !== undefined && g.watchOrder !== null && g.watchOrder !== "").sort((a, b) => parseFloat(a.watchOrder) - parseFloat(b.watchOrder)); 
+            }, [smartGames]);
             
             const deferredWatchOrderSearchQuery = useDeferredValue(watchOrderSearchQuery);
             const watchOrderSuggestions = useMemo(() => {
                 if (!deferredWatchOrderSearchQuery.trim()) return [];
                 const qNorm = toSimplified(deferredWatchOrderSearchQuery).toLowerCase();
-                return games.filter(g => {
+                // 🔴 變更點：改用 smartGames
+                return smartGames.filter(g => {
                     if (g.watchOrder !== undefined && g.watchOrder !== null && g.watchOrder !== "") return false; 
                     const matchId = String(extractFirstNumber(g.order)) === deferredWatchOrderSearchQuery.trim();
                     const gSearch = g.searchName || toSimplified(g.name || "").toLowerCase();
                     return matchId || gSearch.includes(qNorm);
                 }).slice(0, 10);
-            }, [games, deferredWatchOrderSearchQuery]);
+            }, [smartGames, deferredWatchOrderSearchQuery]);
 
             const handleAddWatchOrder = async (gameOrIdStr) => {
                 if (!user) return;
@@ -1297,10 +1453,11 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                     const query = watchOrderSearchQuery.trim(); 
                     if (!query) return;
                     const targetNum = parseInt(query.replace(/[^0-9]/g, ''));
+                    // 🔴 變更點：改用 smartGames 搜尋
                     if (!isNaN(targetNum) && String(targetNum) === query) { 
-                        targetGame = games.find(g => extractFirstNumber(g.order) === targetNum && (!g.watchOrder)); 
+                        targetGame = smartGames.find(g => extractFirstNumber(g.order) === targetNum && (!g.watchOrder)); 
                     }
-                    if (!targetGame && watchOrderSuggestions.length > 0) { 
+                    if (!targetGame && watchOrderSuggestions.length > 0) {
                         targetGame = watchOrderSuggestions[0]; 
                     }
                 }
@@ -1624,13 +1781,13 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                         }, isMobileDevice() ? 40 : 100); // 40ms 給予 React 處理 DOM 渲染的喘息時間
                     }
                 };
-                
                 stepLoadAndScroll();
             }, [displayLimit, showNotify]);
             
+            // 🔴 變更點：改用 smartGames
             const memberStats = useMemo(() => {
                 const sm = {}; 
-                games.forEach(g => { 
+                smartGames.forEach(g => { 
                     const w = Array.isArray(g.watchingBy) ? g.watchingBy : (g.watchingBy ? [g.watchingBy] : []); 
                     w.forEach(n => { 
                         if(!sm[n]) sm[n] = { total: 0, unstarted: 0, watching: 0, completed: 0, cats: {}, sources: {} }; 
@@ -1645,7 +1802,7 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                     }); 
                 }); 
                 return Object.keys(sm).sort().map(n => ({ name: n, color: nameColorMap[n] || '#ffffff', stats: sm[n] }));
-            }, [games, nameColorMap]);
+            }, [smartGames, nameColorMap]);
             
             const activeCategoriesInUse = useMemo(() => { 
                 const sums = {}; 
@@ -1668,8 +1825,9 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
             }, []);
             
             const deferredSearchQuery = useDeferredValue(searchQuery);
+            // 🔴 變更點：改用 smartGames
             const filteredGames = useMemo(() => {
-                let l = [...games]; 
+                let l = [...smartGames]; 
                 const q = deferredSearchQuery.toLowerCase().trim(); 
                 if(q) {
                     const qNorm = toSimplified(q); const isNumSearch = /^\d+$/.test(q); const numToSearch = isNumSearch ? parseInt(q) : null;
@@ -1712,7 +1870,7 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                     l.sort((a, b) => extractFirstNumber(a.order) - extractFirstNumber(b.order)); 
                 }
                 return l;
-            }, [games, deferredSearchQuery, activeTab, memberFilter]);
+            }, [smartGames, deferredSearchQuery, activeTab, memberFilter]);
             
             useEffect(() => { 
                 setDisplayLimit(prev => (filteredGames.length > filteredGamesLengthRef.current && prev <= filteredGamesLengthRef.current) ? prev + CHUNK_SIZE : prev); 
@@ -1829,18 +1987,7 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                     <div className="flex items-center gap-2 mb-2 border-b border-white/5 pb-1 font-black text-white/50 text-xs uppercase"><Icon name="history" className="w-4 h-4 text-[#ffbae9]" /> 操作日誌</div>
                     <div className="flex-1 overflow-y-auto custom-scrollbar font-mono text-[13px] space-y-1 text-white/70">
                         {activityLogs.map(l => (
-                            <div key={l.id} className="border-b border-white/5 py-1 flex items-center w-full group transition-all">
-                                <span className="text-white/30 text-[10px] mr-1 flex-shrink-0">{formatDate(l.timestamp).split(' ')[1]}</span> 
-                                <span className="font-bold mr-0.5 flex-shrink-0 text-[11.5px]" style={{ color: nameColorMap[l.userName] || '#fff' }}>{l.userName}</span> 
-                                {l.action === "系統" ? (
-                                    <span className="font-black text-[11.5px] text-green-400 truncate group-hover:whitespace-normal group-hover:overflow-visible group-hover:break-all shrink min-w-0 transition-all pr-2" title={l.gameName}>{formatBracketTitle(l.gameName)}</span> 
-                                ) : (
-                                    <>
-                                        {/* 這裡加入了條件判斷：如果是「移除」，就變成淺紅色加粗 */}
-                                        <span className={`mr-0.5 flex-shrink-0 text-[10.5px] ${l.action === '移除' ? 'text-red-400 font-bold' : 'opacity-80'}`}>{l.action}</span><span className="font-black text-[11.5px] truncate group-hover:whitespace-normal group-hover:overflow-visible group-hover:break-all shrink min-w-0 transition-all" title={l.gameName}>{l.gameOrder && <span className="text-[#ffbae9] mr-0.5 relative -top-[1px]">[{l.gameOrder}]</span>}{formatBracketTitle(l.gameName)}</span>{l.extraDetail && <span className="text-cyan-300 font-bold flex-shrink-0 text-[10.5px] pr-2">{l.extraDetail}</span>}
-                                    </>
-                                )}
-                            </div>
+                            <ActivityLogItem key={l.id} l={l} nameColorMap={nameColorMap} />
                         ))}
                     </div>
                 </div>
@@ -2071,56 +2218,26 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
             // ==========================================
             
             // 1. 計算在給定時間段內，該劇更新了多少集
-            const countAiringEvents = useCallback((startDate, endDate, updateDays, updateTimeStr) => {
-                if (!startDate || !endDate || startDate >= endDate || !updateDays || !updateTimeStr) return 0;
-                const daysMap = { '日': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6 };
-                const targetDays = (Array.isArray(updateDays) ? updateDays : [updateDays]).map(d => daysMap[d]).filter(d => d !== undefined);
-                if (targetDays.length === 0) return 0;
-                
-                const [targetH, targetM] = updateTimeStr.split(':').map(Number);
-                let count = 0;
-                
-                let current = new Date(startDate.getTime());
-                current.setHours(targetH, targetM, 0, 0);
-                
-                if (current <= startDate) {
-                    current.setDate(current.getDate() + 1);
-                }
-
-                while (current <= endDate) {
-                    if (targetDays.includes(current.getDay())) {
-                        count++;
-                    }
-                    current.setDate(current.getDate() + 1);
-                }
-                return count;
-            }, []);
+            // ==========================================
+            // 新增：追劇提醒助手核心邏輯與自動時間戳計算 (動態看人篩選版)
+            // ==========================================
+            
+            // 1. 計算在給定時間段內，該劇更新了多少集
+            
 
             // 2. 智慧過濾：根據「誰在看」與切換標籤篩選清單
             const reminderGames = useMemo(() => {
-                return games.map(g => {
-                    if (g.airingStatus !== "連載中") return null;
-                    if (!g.updateDay || (Array.isArray(g.updateDay) ? g.updateDay.length === 0 : !g.updateDay) || !g.updateTime) return null;
+                return smartGames.map(g => { // 🔴 改用充滿智慧的 smartGames
+                    if (g.airingStatus !== "連載中" || !g.updateDay || (Array.isArray(g.updateDay) ? g.updateDay.length === 0 : !g.updateDay) || !g.updateTime) return null;
                     
                     const watchers = Array.isArray(g.watchingBy) ? g.watchingBy : [];
-                    
-                    // 根據切換開關，決定目前要比對誰的進度
-                    let activeTrackUsers = [];
-                    if (reminderUserFilter === "全部") {
-                        activeTrackUsers = ["糖糖", "雲雲"];
-                    } else {
-                        activeTrackUsers = [reminderUserFilter];
-                    }
-                    
-                    // 只檢查真正有在看這部劇的成員
+                    let activeTrackUsers = (reminderUserFilter === "全部") ? ["糖糖"] : [reminderUserFilter];
                     activeTrackUsers = activeTrackUsers.filter(u => watchers.includes(u));
                     if (activeTrackUsers.length === 0) return null;
 
-                    const docUpdatedAt = g.updatedAt?.toDate ? g.updatedAt.toDate() : (g.updatedAt?.seconds ? new Date(g.updatedAt.seconds * 1000) : (g.timestamp?.seconds ? new Date(g.timestamp.seconds * 1000) : new Date(0)));
-                    const now = new Date();
-                    const missedEpisodes = countAiringEvents(docUpdatedAt, now, g.updateDay, g.updateTime);
-                    const curUpdateDB = parseFloat(g.updatedEpisodes?.v1) || 0;
-                    const virtualUpdate = curUpdateDB + missedEpisodes;
+                    const virtualUpdate = g._virtualUpdate;
+                    const curUpdateDB = g._rawUpdatedEpisodes ? (parseFloat(g._rawUpdatedEpisodes.v1) || 0) : virtualUpdate;
+                    const missedEpisodes = g._missedEpisodes;
 
                     let needsReminder = false;
                     const userStatuses = [];
@@ -2128,44 +2245,29 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                     activeTrackUsers.forEach(u => {
                         const myProg = g.watchedProgress?.[u] || { v1: '0', u1: '集' };
                         const curWatch = parseFloat(myProg.v1) || 0;
-                        const behindCount = virtualUpdate - curWatch;
+                        const behindCount = Math.max(0, virtualUpdate - curWatch);
                         
                         if (behindCount > 0) {
                             needsReminder = true;
                             const isNew = curWatch >= curUpdateDB && missedEpisodes > 0;
-                            userStatuses.push({
-                                user: u,
-                                watch: curWatch,
-                                behind: behindCount,
-                                isNew: isNew
-                            });
+                            userStatuses.push({ user: u, watch: curWatch, behind: behindCount, isNew: isNew });
                         }
                     });
 
                     if (needsReminder) {
-                        return {
-                            ...g,
-                            _virtualUpdate: virtualUpdate,
-                            _userStatuses: userStatuses
-                        };
+                        return { ...g, _userStatuses: userStatuses };
                     }
                     return null;
                 }).filter(Boolean).sort((a, b) => extractFirstNumber(a.order) - extractFirstNumber(b.order));
-            }, [games, reminderUserFilter, countAiringEvents]);
+            }, [smartGames, reminderUserFilter]);
 
-            // 3. 一鍵追更：智慧判斷單人 +1 或雙人同步 +1
+            // 3. 一鍵追更：防超量保護機制
             const handleQuickProgressPlusOne = async (e, g) => {
                 e.stopPropagation();
                 if (!user || isSaving) return;
                 try {
-                    let usersToUpdate = [];
-                    if (reminderUserFilter === "全部") {
-                        usersToUpdate = ["糖糖", "雲雲"];
-                    } else {
-                        usersToUpdate = [reminderUserFilter];
-                    }
-
-                    // 防呆：只更新有在看這部劇的成員進度
+                    const total = parseFloat(g.totalEpisodes?.v1) || Infinity;
+                    let usersToUpdate = (reminderUserFilter === "全部") ? ["糖糖"] : [reminderUserFilter];
                     const watchers = Array.isArray(g.watchingBy) ? g.watchingBy : [];
                     usersToUpdate = usersToUpdate.filter(u => watchers.includes(u));
                     if (usersToUpdate.length === 0) return;
@@ -2176,27 +2278,33 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                     usersToUpdate.forEach(u => {
                         const uProg = updatedWatchedProgress[u] || { v1: '0', u1: '集', v2: '', u2: '分鐘' };
                         const curWatch = parseFloat(uProg.v1) || 0;
-                        const nextWatchV1 = curWatch + 1;
+                        
+                        // 【上限保護】進度 +1 但絕對不能超過總集數
+                        const nextWatchV1 = Math.min(curWatch + 1, total);
                         maxNextWatchV1 = Math.max(maxNextWatchV1, nextWatchV1);
                         updatedWatchedProgress[u] = { ...ensureP(uProg), v1: nextWatchV1.toString() };
                     });
 
-                    // 確保伺服器的最新總集數會跟著往前推
-                    const nextUpdateV1 = Math.max(g._virtualUpdate, maxNextWatchV1);
+                    // 同步推動最新集數（取 MAX 避免倒退，且不超過總集數）
+                    const nextUpdateV1 = Math.min(Math.max(g._virtualUpdate, maxNextWatchV1), total);
 
                     const payload = {
                         watchedProgress: updatedWatchedProgress,
-                        updatedEpisodes: { ...ensureP(g.updatedEpisodes), v1: nextUpdateV1.toString() },
-                        updatedAt: serverTimestamp() // 刷新時間戳以實現自動銷帳
+                        // 存進資料庫時，以原始數字去覆蓋，避免時間重複疊加
+                        updatedEpisodes: { ...ensureP(g._rawUpdatedEpisodes || g.updatedEpisodes), v1: nextUpdateV1.toString() },
+                        updatedAt: serverTimestamp() 
                     };
                     
                     await setDoc(doc(getPublicCol('games'), g.id), payload, { merge: true });
-                    logActivity("修改", g.name, g.order, `快速追更 +1 集 (${usersToUpdate.join(" & ")} 進度已連動)`);
+                    logActivity("修改", g.name, g.order, `追更 +1 集`);
                     showNotify(`進度更新成功！`);
                 } catch (err) {
                     showNotify(`更新失敗：${err.message}`);
                 }
             };
+            // ==========================================
+            // 核心邏輯置入結束
+            // ==========================================
             // ==========================================
             // 核心邏輯置入結束
             // ==========================================
@@ -2224,7 +2332,7 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                                         
                                         {/* 🎯 右上角：切換顯示選項 */}
                                         <div className="flex items-center bg-black/40 p-0.5 rounded border border-white/10 text-[9px] font-black tracking-normal">
-                                            {["全部", "糖糖", "雲雲"].map(mode => (
+                                            {["全部", "糖糖"].map(mode => (
                                                 <button
                                                     key={mode}
                                                     type="button"
@@ -2244,38 +2352,53 @@ showNotify("資料已儲存"); setIsModalOpen(false); setEditingId(null);
                                             </div>
                                         ) : (
                                             <div className="grid gap-1.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(165px, 1fr))' }}>
-                                                {reminderGames.map(g => (
-                                                    <div key={g.id} className="flex items-center justify-between bg-white/5 border border-white/5 rounded hover:border-green-500/30 transition-colors transform-gpu overflow-hidden pr-2">
-                                                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                                                            {g.cover ? (
-                                                                <img src={g.cover} className="w-[28px] h-[38px] object-cover flex-shrink-0 bg-black/20" alt="" />
-                                                            ) : (
-                                                                <div className="w-[28px] h-[38px] bg-black/40 flex items-center justify-center text-white/10 flex-shrink-0"><Icon name="image" className="w-3 h-3" /></div>
-                                                            )}
-                                                            <div className="min-w-0 flex-1 py-0.5">
-                                                                <span className="font-black text-[11px] text-white truncate block leading-tight mb-0.5">{g.name}</span>
-                                                                <div className="text-[9px] font-bold block truncate space-x-1">
-                                                                    {g._userStatuses.map((s, idx) => {
-                                                                        const colorClass = s.isNew ? 'text-amber-400 animate-pulse' : 'text-red-400';
-                                                                        return (
-                                                                            <span key={s.user} className={colorClass}>
-                                                                                {s.user}{s.isNew ? '🔥新' : `-${s.behind}`}
-                                                                                {idx < g._userStatuses.length - 1 && <span className="text-white/20 ml-1">|</span>}
-                                                                            </span>
-                                                                        );
-                                                                    })}
+                                                {reminderGames.map(g => {
+                                                    const curWatch = parseFloat(g.watchedProgress?.[userName]?.v1) || 0;
+                                                    const virtualUpdate = g._virtualUpdate;
+                                                    
+                                                    // 1. 計算該檔案在當前篩選模式下的「最大未看集數」
+                                                    // 如果是雙人模式，取兩個人之中落後最多（最大值）的那筆數字來顯示在按鈕上
+                                                    const maxBehind = Math.max(...g._userStatuses.map(s => s.behind));
+
+                                                    // 2. 判斷是否為純時間戳觸發的新集數（原本已看 >= 資料庫最新，但推算有新事件）
+                                                    const isPureTimeUpdate = g._userStatuses.some(s => s.isNew);
+                                                    
+                                                    return (
+                                                        <div key={g.id} className="flex items-center justify-between bg-white/5 border border-white/5 rounded hover:border-green-500/30 transition-colors transform-gpu overflow-hidden pr-2">
+                                                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                                {g.cover ? (
+                                                                    <img src={g.cover} className="w-[28px] h-[38px] object-cover flex-shrink-0 bg-black/20" alt="" />
+                                                                ) : (
+                                                                    <div className="w-[28px] h-[38px] bg-black/40 flex items-center justify-center text-white/10 flex-shrink-0"><Icon name="image" className="w-3 h-3" /></div>
+                                                                )}
+                                                                <div className="min-w-0 flex-1 py-0.5">
+                                                                    <span className="font-black text-[11px] text-white truncate block leading-tight mb-0.5">{g.name}</span>
+                                                                    <div className="text-[9px] font-bold block truncate space-x-1">
+                                                                        {g._userStatuses.map((s, idx) => {
+                                                                            const colorClass = s.isNew ? 'text-amber-400 animate-pulse' : 'text-red-400';
+                                                                            return (
+                                                                                <span key={s.user} className={colorClass}>
+                                                                                    {s.user}{s.isNew ? '🔥新' : `-${s.behind}`}
+                                                                                    {idx < g._userStatuses.length - 1 && <span className="text-white/20 ml-1">|</span>}
+                                                                                </span>
+                                                                            );
+                                                                        })}
+                                                                    </div>
                                                                 </div>
                                                             </div>
+                                                            
+                                                            {/* 🎯 這裡優化：將原本的 "+1" 變更為 "+未看集數數量" */}
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={(e) => handleQuickProgressPlusOne(e, g)} 
+                                                                className="bg-green-600 hover:bg-white hover:text-[#3f5968] text-white font-black text-[10.5px] px-2 py-0.5 rounded shadow transition-colors flex-shrink-0 ml-1 min-w-[34px] text-center"
+                                                                title={`點擊快速前進 1 集 (當前共落後 ${maxBehind} 集)`}
+                                                            >
+                                                                +{maxBehind}
+                                                            </button>
                                                         </div>
-                                                        <button 
-                                                            type="button" 
-                                                            onClick={(e) => handleQuickProgressPlusOne(e, g)} 
-                                                            className="bg-green-600 hover:bg-white hover:text-[#3f5968] text-white font-black text-[11px] px-2 py-0.5 rounded shadow transition-colors flex-shrink-0 ml-1"
-                                                        >
-                                                            +1
-                                                        </button>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </div>
