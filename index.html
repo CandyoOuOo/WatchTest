@@ -160,6 +160,215 @@
 <body>
     <div id="root"></div>
     <script type="text/babel" data-type="module">
+        import { initializeApp } from "https://gs.jurieo.com/gemini/gstatic/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://gs.jurieo.com/gemini/gstatic/firebasejs/11.1.0/firebase-auth.js";
+        import { initializeFirestore, persistentLocalCache, getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, limit, writeBatch } from "https://gs.jurieo.com/gemini/gstatic/firebasejs/11.1.0/firebase-firestore.js";
+
+        const { useState, useEffect, useRef, useMemo, memo, useCallback, useDeferredValue } = React;
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBS1uezUnNrohIDovyvNixmbcJ_dtNgVUs",
+          authDomain: "watch-7497b.firebaseapp.com",
+          databaseURL: "https://watch-7497b-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "watch-7497b",
+          storageBucket: "watch-7497b.firebasestorage.app",
+          messagingSenderId: "317588373442",
+          appId: "1:317588373442:web:5b72b60592e0e3efbce05b"
+          measurementId: "G-4XR7Q57H1N"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        let db;
+        try {
+            db = initializeFirestore(app, { localCache: persistentLocalCache() });
+        } catch (error) {
+            db = getFirestore(app);
+        }
+        
+        const appId = 'video-library-v1';
+        const isMobileDevice = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const NUM_REGEX = /(\d+(\.\d+)?)/;
+        const IGNORE_CHAR_REGEX = /^[\s\-—:：,，.。!！?？()（）\[\]【】《》<>\/\\~～]+$/;
+
+        const emptyProgress = { v1: '', u1: '集', v2: '', u2: '分鐘' };
+        const displayMembers = ["糖糖"];
+        const ensureP = (v) => v?.v1 !== undefined ? { ...emptyProgress, ...v } : { ...emptyProgress, v1: v || '' };
+        const getPublicCol = (col) => collection(db, 'artifacts', appId, 'public', 'data', col);
+
+        const extractFirstNumber = (val) => {
+            if (val === undefined || val === null || val === "") return 0;
+            if (typeof val === 'object' && val.v1 !== undefined) return parseFloat(val.v1) || 0;
+            const match = String(val).match(NUM_REGEX);
+            return match ? parseFloat(match[1]) : 0;
+        };
+
+        const calculateDualProgress = (cur, tot, updated) => {
+            const c1 = parseFloat(cur?.v1) || 0, c2 = parseFloat(cur?.v2) || 0;
+            let d1 = updated ? (parseFloat(updated?.v1) || parseFloat(tot?.v1) || 0) : (parseFloat(tot?.v1) || 0);
+            let d2 = updated ? (parseFloat(updated?.v2) || parseFloat(tot?.v2) || 0) : (parseFloat(tot?.v2) || 0);
+            if (d1 <= 0) return 0;
+            if (c1 < d1) return Math.floor(Math.min(((c1 / d1) + ((c2 / 100) * (1 / d1))) * 100, 99)); 
+            if (c1 >= d1) return (d2 > 0 && c1 === d1) ? Math.floor(Math.min((((d1 - 1) / d1) + ((Math.min(c2, d2) / d2) * (1 / d1))) * 100, 100)) : 100;
+            return 100;
+        };
+
+        const formatProgressText = (prog) => {
+            if (!prog || typeof prog !== 'object') return prog || "0";
+            let parts = [];
+            if (prog.v1 && prog.v1 !== "") parts.push(`${prog.v1}${prog.u1 || ''}`);
+            if (prog.v2 && prog.v2 !== "") parts.push(`${prog.v2}${prog.u2 || ''}`);
+            return parts.join(' ') || "0";
+        };
+
+        const formatDate = (ts, dateOnly = false) => { 
+            if (!ts) return ""; if (typeof ts === 'string') return ts;
+            let date;
+            try {
+                if (ts?.toDate) date = ts.toDate();
+                else if (ts?.seconds !== undefined) date = new Date(ts.seconds * 1000);
+                else date = new Date(ts);
+            } catch (e) { return "NOW"; }
+            if (!date || isNaN(date.getTime())) return "NOW";
+            const Y = date.getFullYear(), M = (date.getMonth() + 1).toString().padStart(2, '0'), D = date.getDate().toString().padStart(2, '0');
+            if (dateOnly) return `${Y}-${M}-${D}`;
+            return `${Y}-${M}-${D} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`; 
+        };
+
+        const converterT2S = window.OpenCC ? window.OpenCC.Converter({ from: 'tw', to: 'cn' }) : (s) => s;
+        const converterS2T = window.OpenCC ? window.OpenCC.Converter({ from: 'cn', to: 'tw' }) : (s) => s;
+        const toSimplified = (str) => str ? converterT2S(str) : "";
+        const toTraditional = (str) => str ? converterS2T(str) : "";
+
+        const compressImage = (dataUrl, maxWidth = 800) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image(); img.onerror = reject;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/webp', 0.8)); 
+                };
+                img.src = dataUrl;
+            });
+        };
+
+        const sanitizePayload = (obj, depth = 0) => {
+            if (depth > 12) return null;
+            if (obj === null || obj === undefined) return "";
+            if (obj && typeof obj === 'object') {
+                if (obj.hasOwnProperty('_methodName') || (obj.constructor && obj.constructor.name === 'FieldValueImpl')) { return obj; }
+                if (obj instanceof Date) return obj;
+            }
+            if (Array.isArray(obj)) { return obj.map(v => sanitizePayload(v, depth + 1)); }
+            if (typeof obj === 'object' && obj.constructor === Object) {
+                const cleaned = {};
+                Object.keys(obj).forEach(key => { cleaned[key] = sanitizePayload(obj[key], depth + 1); });
+                return cleaned;
+            }
+            return obj;
+        };
+
+        const Icon = memo(({ name, className, onClick, title }) => {
+            const spanRef = useRef(null);
+            useEffect(() => {
+                let timer;
+                const renderIcon = () => {
+                    if (spanRef.current && window.lucide) {
+                        spanRef.current.innerHTML = `<i data-lucide="${name}"></i>`;
+                        window.lucide.createIcons({ root: spanRef.current });
+                        const svg = spanRef.current.querySelector('svg');
+                        if (svg) { svg.style.width = '100%'; svg.style.height = '100%'; }
+                    } else { timer = setTimeout(renderIcon, 100); }
+                };
+                renderIcon();
+                return () => clearTimeout(timer);
+            }, [name]);
+            return (
+                <span ref={spanRef} onClick={(e) => { if(onClick) { e.preventDefault(); e.stopPropagation(); onClick(e); } }} className={`inline-flex items-center justify-center cursor-pointer ${className || ''}`} title={title} />
+            );
+        });
+
+        const WatchOrderInput = memo(({ value, onChange, disabled }) => {
+            const [val, setVal] = useState(value || '');
+            useEffect(() => { setVal(value || ''); }, [value]);
+            const handleBlur = () => { if (val !== (value || '')) { onChange(val); } };
+            const handleKeyDown = (e) => { if (e.key === 'Enter') e.target.blur(); };
+            return (
+                <input type="number" disabled={disabled} className="w-full bg-black/40 border border-white/10 rounded px-1 py-1.5 text-center font-black text-[#ffbae9] text-[13px] focus:border-[#ffbae9] outline-none disabled:opacity-50 transition-colors" value={val} onChange={(e) => setVal(e.target.value)} onBlur={handleBlur} onKeyDown={handleKeyDown} placeholder="-" />
+            );
+        });
+
+        const ImageCropperModal = memo(({ imageSrc, onCrop, onCancel }) => {
+            const [position, setPosition] = useState({ x: 0, y: 0 });
+            const [scale, setScale] = useState(1);
+            const containerRef = useRef(null); const imgRef = useRef(null);
+            const isDragging = useRef(false); const lastPos = useRef({ x: 0, y: 0 });
+            const handleMouseDown = (e) => { isDragging.current = true; lastPos.current = { x: e.clientX, y: e.clientY }; };
+            const handleMouseMove = (e) => {
+                if (!isDragging.current) return;
+                const dx = e.clientX - lastPos.current.x, dy = e.clientY - lastPos.current.y;
+                setPosition(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+                lastPos.current = { x: e.clientX, y: e.clientY };
+            };
+            const handleMouseUp = () => { isDragging.current = false; };
+            const handleTouchStart = (e) => { if(e.touches.length === 1) { isDragging.current = true; lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } };
+            const handleTouchMove = (e) => {
+                if (!isDragging.current || e.touches.length !== 1) return;
+                const dx = e.touches[0].clientX - lastPos.current.x;
+                const dy = e.touches[0].clientY - lastPos.current.y;
+                setPosition(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+                lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            };
+            const handleWheel = (e) => { const step = 0.005; setScale(prev => Math.max(0.01, Math.min(10, prev + (e.deltaY > 0 ? -step : step)))); };
+            const handleConfirm = () => {
+                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                canvas.width = 800; canvas.height = 1066; ctx.fillStyle = "#3f5968"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const img = imgRef.current, holeSize = { w: 300, h: 400 };
+                const centerX = containerRef.current.offsetWidth / 2, centerY = containerRef.current.offsetHeight / 2;
+                const resRatio = canvas.width / holeSize.w;
+                ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+                const displayRatio = img.offsetWidth / img.naturalWidth;
+                const drawW = img.naturalWidth * displayRatio * scale;
+                const drawH = img.naturalHeight * displayRatio * scale;
+                const finalX = (position.x + (centerX - (drawW / 2)) - (centerX - (holeSize.w / 2))) * resRatio;
+                const finalY = (position.y + (centerY - (drawH / 2)) - (centerY - (holeSize.h / 2))) * resRatio;
+                ctx.drawImage(img, finalX, finalY, drawW * resRatio, drawH * resRatio);
+                onCrop(canvas.toDataURL('image/webp', 0.8)); 
+            };
+            return (
+                <div className="fixed inset-0 z-[600] bg-[#3f5968] flex flex-col">
+                    <div className="flex-1 relative overflow-hidden bg-[#3f5968] cursor-move" 
+                         style={{ touchAction: 'none' }}
+                         ref={containerRef} 
+                         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onWheel={handleWheel}
+                         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
+                        <img ref={imgRef} src={imageSrc} style={{ position: 'absolute', top: '50%', left: '50%', transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px) scale(${scale})`, maxWidth: 'none', userSelect: 'none', pointerEvents: 'none' }} />
+                        <div className="crop-overlay"><div className="crop-hole" style={{ width: '300px', height: '400px' }}></div></div>
+                    </div>
+                    <div className="p-6 bg-[#0b0e14] border-t border-white/10 flex flex-col md:flex-row gap-6 justify-between items-center">
+                        <div className="flex flex-col gap-2 w-full md:w-auto">
+                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">精密縮放控制</span>
+                            <div className="flex items-center gap-4">
+                                <Icon name="minus" className="w-3 h-3 text-white/20" />
+                                <input type="range" min="0.01" max="5" step="0.001" value={scale} onChange={e => setScale(parseFloat(e.target.value))} className="w-full md:w-64 accent-[#ffbae9]" />
+                                <Icon name="plus" className="w-3 h-3 text-white/20" />
+                                <span className="text-[10px] font-mono text-[#ffbae9] min-w-[40px]">{scale.toFixed(3)}x</span>
+                            </div>
+                        </div>
+                        <div className="flex gap-4 w-full md:w-auto">
+                            <button onClick={onCancel} className="flex-1 md:flex-none px-6 py-2 bg-white/5 text-xs font-black rounded uppercase">取消</button>
+                            <button onClick={handleConfirm} className="flex-1 md:flex-none px-10 py-2 bg-[#ffbae9] text-[#3f5968] text-xs font-black rounded uppercase shadow-lg">確認裁剪</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        });
 
         const TitleIcon = () => (
             <svg className="w-14 h-14" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
